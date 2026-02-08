@@ -5,6 +5,7 @@ import { TEvent } from "@/lib/api";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -15,6 +16,7 @@ interface EventModalProps {
   isOpen: boolean;
   onClose: () => void;
   onEventClick: (event: TEvent) => void;
+  isAuthenticated: boolean;
 }
 
 function formatTimeRange(startTime: number, endTime: number): string {
@@ -53,6 +55,7 @@ export function EventModal({
   isOpen,
   onClose,
   onEventClick,
+  isAuthenticated,
 }: EventModalProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -72,14 +75,18 @@ export function EventModal({
 
   const relatedEvents = event.related_events
     .map((id) => allEvents.find((e) => e.id === id))
-    .filter((e): e is TEvent => e !== undefined);
+    .filter((e): e is TEvent => e !== undefined)
+    .filter((e) => isAuthenticated || e.permission === "public");
 
   const eventUrl = event.public_url || event.private_url;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-card border-0 max-w-5xl max-h-[85vh] p-0 flex flex-col [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-        <DialogHeader className="px-8 pt-8 pb-4 sm:px-10 sm:pt-12 sm:pb-6 shrink-0">
+      <DialogContent className="bg-card border-0 max-w-5xl h-screen sm:h-auto sm:max-h-[85vh] p-0 flex flex-col top-0 sm:top-[50%] translate-y-0 sm:translate-y-[-50%] rounded-none sm:rounded-lg [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        <DialogHeader className="px-8 pt-10 pb-4 sm:px-10 sm:pt-12 sm:pb-6 shrink-0 text-left">
+          <DialogDescription className="sr-only">
+            Event details for {event.name}
+          </DialogDescription>
           <div
             className={`text-xs font-semibold uppercase tracking-wide ${eventTypeColors[event.event_type]}`}
           >
@@ -93,7 +100,10 @@ export function EventModal({
           </p>
         </DialogHeader>
 
-        <div ref={scrollRef} className="overflow-y-auto flex-1 px-6 sm:px-10 relative [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        <div
+          ref={scrollRef}
+          className="overflow-y-auto flex-1 px-8 sm:px-10 relative [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+        >
           <div className="space-y-8 pt-0 pb-6 sm:pt-0 sm:pb-8">
             {event.speakers && event.speakers.length > 0 && (
               <div>

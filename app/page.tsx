@@ -69,20 +69,29 @@ export default function Home() {
 
   useEffect(() => {
     const hash = window.location.hash.slice(1);
-    if (hash) {
+    if (hash && allEvents.length > 0) {
       const eventId = parseInt(hash);
       const event = allEvents.find((e) => e.id === eventId);
+      
       if (event) {
-        setSelectedEvent(event);
-        setIsModalOpen(true);
+        const canView = isAuthenticated || event.permission === "public";
+        if (canView) {
+          setSelectedEvent(event);
+          setIsModalOpen(true);
+        } else {
+          window.history.pushState(null, "", window.location.pathname);
+        }
       }
     }
-  }, [allEvents]);
+  }, [allEvents, isAuthenticated]);
 
   const handleEventClick = (event: TEvent) => {
-    setSelectedEvent(event);
-    setIsModalOpen(true);
-    window.history.pushState(null, "", `#${event.id}`);
+    const canView = isAuthenticated || event.permission === "public";
+    if (canView) {
+      setSelectedEvent(event);
+      setIsModalOpen(true);
+      window.history.pushState(null, "", `#${event.id}`);
+    }
   };
 
   const handleCloseModal = () => {
@@ -218,6 +227,7 @@ export default function Home() {
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         onEventClick={handleEventClick}
+        isAuthenticated={isAuthenticated}
       />
     </div>
   );
