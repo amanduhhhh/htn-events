@@ -58,7 +58,7 @@ export function EventCard({ event }: EventCardProps) {
   };
 
   return (
-    <Card className="bg-card border-dark-blue/30 hover:border-light-blue/50 transition-colors">
+    <Card className="bg-card border-0">
       <CardHeader>
         <div
           className={`text-xs font-semibold uppercase tracking-wide mb-2 ${eventTypeColors[event.event_type]}`}
