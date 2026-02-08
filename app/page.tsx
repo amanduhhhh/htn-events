@@ -119,7 +119,7 @@ export default function Home() {
           <div className="space-y-10">
             {groupedEvents.map((group) => (
               <div key={group.date}>
-                <h2 className="text-2xl font-bold text-foreground mb-6 border-b border-dark-blue/30 pb-2">
+                <h2 className="text-2xl font-bold text-foreground mb-6">
                   {group.date}
                 </h2>
                 <div className="grid gap-6 md:grid-cols-2">

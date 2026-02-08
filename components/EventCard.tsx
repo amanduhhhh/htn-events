@@ -60,24 +60,22 @@ export function EventCard({ event }: EventCardProps) {
   return (
     <Card className="bg-card border-dark-blue/30 hover:border-light-blue/50 transition-colors">
       <CardHeader>
+        <div
+          className={`text-xs font-semibold uppercase tracking-wide mb-2 ${eventTypeColors[event.event_type]}`}
+        >
+          {formatEventType(event.event_type)}
+        </div>
         <CardTitle className="text-foreground">{event.name}</CardTitle>
         <CardDescription className="text-yellow">
           {formatTimeRange(event.start_time, event.end_time)}
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="space-y-2">
-          <div
-            className={`text-sm font-semibold ${eventTypeColors[event.event_type]}`}
-          >
-            {formatEventType(event.event_type)}
-          </div>
-          {event.description && (
-            <p className="text-sm text-foreground/70">
-              {truncateDescription(event.description)}
-            </p>
-          )}
-        </div>
+        {event.description && (
+          <p className="text-sm text-foreground/70">
+            {truncateDescription(event.description)}
+          </p>
+        )}
       </CardContent>
     </Card>
   );
