@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { fetchEvents, TEvent } from "@/lib/api";
 import { EventCard } from "@/components/EventCard";
+import { EventModal } from "@/components/EventModal";
 import { Button } from "@/components/ui/button";
 
 interface GroupedEvents {
@@ -53,15 +54,42 @@ function groupEventsByDate(events: TEvent[]): GroupedEvents[] {
 
 export default function Home() {
   const [groupedEvents, setGroupedEvents] = useState<GroupedEvents[]>([]);
+  const [allEvents, setAllEvents] = useState<TEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<TEvent | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
     const authStatus = localStorage.getItem("isAuthenticated") === "true";
     setIsAuthenticated(authStatus);
   }, []);
+
+  useEffect(() => {
+    const hash = window.location.hash.slice(1);
+    if (hash) {
+      const eventId = parseInt(hash);
+      const event = allEvents.find((e) => e.id === eventId);
+      if (event) {
+        setSelectedEvent(event);
+        setIsModalOpen(true);
+      }
+    }
+  }, [allEvents]);
+
+  const handleEventClick = (event: TEvent) => {
+    setSelectedEvent(event);
+    setIsModalOpen(true);
+    window.history.pushState(null, "", `#${event.id}`);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedEvent(null);
+    window.history.pushState(null, "", window.location.pathname);
+  };
 
   const handleLogout = () => {
     localStorage.removeItem("isAuthenticated");
@@ -77,6 +105,8 @@ export default function Home() {
         const sortedEvents = fetchedEvents.sort(
           (a, b) => a.start_time - b.start_time
         );
+
+        setAllEvents(sortedEvents);
 
         const filteredEvents = isAuthenticated
           ? sortedEvents
@@ -168,7 +198,12 @@ export default function Home() {
                 </h2>
                 <div className="grid gap-6 sm:grid-cols-2">
                   {group.events.map((event) => (
-                    <EventCard key={event.id} event={event} />
+                    <div key={event.id} id={`event-${event.id}`}>
+                      <EventCard
+                        event={event}
+                        onClick={() => handleEventClick(event)}
+                      />
+                    </div>
                   ))}
                 </div>
               </div>
@@ -176,6 +211,14 @@ export default function Home() {
           </div>
         )}
       </div>
+
+      <EventModal
+        event={selectedEvent}
+        allEvents={allEvents}
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onEventClick={handleEventClick}
+      />
     </div>
   );
 }

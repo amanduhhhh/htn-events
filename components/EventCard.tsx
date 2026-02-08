@@ -9,6 +9,7 @@ import {
 
 interface EventCardProps {
   event: TEvent;
+  onClick?: () => void;
 }
 
 function formatTimeRange(startTime: number, endTime: number): string {
@@ -50,7 +51,7 @@ function truncateDescription(
   return description.slice(0, maxLength).trim() + "...";
 }
 
-export function EventCard({ event }: EventCardProps) {
+export function EventCard({ event, onClick }: EventCardProps) {
   const eventTypeColors = {
     workshop: "text-pink",
     activity: "text-orange",
@@ -58,7 +59,10 @@ export function EventCard({ event }: EventCardProps) {
   };
 
   return (
-    <Card className="bg-card border-0">
+    <Card 
+      className="bg-card border-0 cursor-pointer hover:bg-card/80 transition-colors" 
+      onClick={onClick}
+    >
       <CardHeader>
         <div
           className={`text-xs font-semibold uppercase tracking-wide mb-2 ${eventTypeColors[event.event_type]}`}

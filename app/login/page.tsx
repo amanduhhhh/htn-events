@@ -35,17 +35,17 @@ export default function LoginPage() {
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
           <h2 className="text-3xl sm:text-4xl font-bold text-foreground">
-            Welcome Back
+            Log in
           </h2>
         </div>
 
         <Card className="bg-card border-0">
-          <CardContent className="pt-6">
-            <form onSubmit={handleSubmit} className="space-y-5">
-              <div className="space-y-2">
+          <CardContent className="pt-2">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-4">
                 <label
                   htmlFor="username"
-                  className="text-sm font-medium text-foreground"
+                  className="text-base font-semibold text-foreground block"
                 >
                   Username
                 </label>
@@ -60,10 +60,10 @@ export default function LoginPage() {
                 />
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-4">
                 <label
                   htmlFor="password"
-                  className="text-sm font-medium text-foreground"
+                  className="text-base font-semibold text-foreground block"
                 >
                   Password
                 </label>
@@ -87,7 +87,7 @@ export default function LoginPage() {
               <Button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-pink hover:bg-pink/80 text-background font-semibold"
+                className="w-full bg-light-blue hover:bg-light-blue/80 text-background font-semibold"
               >
                 {isLoading ? "Signing in..." : "Sign In"}
               </Button>
