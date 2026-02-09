@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { fetchEvents, TEvent } from "@/lib/api";
@@ -52,9 +52,13 @@ function groupEventsByDate(events: TEvent[]): GroupedEvents[] {
   return result;
 }
 
+const EVENTS_PER_PAGE = 6;
+
 export default function Home() {
   const [groupedEvents, setGroupedEvents] = useState<GroupedEvents[]>([]);
   const [allEvents, setAllEvents] = useState<TEvent[]>([]);
+  const [filteredEvents, setFilteredEvents] = useState<TEvent[]>([]);
+  const [visibleCount, setVisibleCount] = useState(EVENTS_PER_PAGE);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -72,7 +76,7 @@ export default function Home() {
     if (hash && allEvents.length > 0) {
       const eventId = parseInt(hash);
       const event = allEvents.find((e) => e.id === eventId);
-      
+
       if (event) {
         const canView = isAuthenticated || event.permission === "public";
         if (canView) {
@@ -110,19 +114,19 @@ export default function Home() {
       try {
         setLoading(true);
         const fetchedEvents = await fetchEvents();
-        
+
         const sortedEvents = fetchedEvents.sort(
-          (a, b) => a.start_time - b.start_time
+          (a, b) => a.start_time - b.start_time,
         );
 
         setAllEvents(sortedEvents);
 
-        const filteredEvents = isAuthenticated
+        const filtered = isAuthenticated
           ? sortedEvents
           : sortedEvents.filter((event) => event.permission === "public");
 
-        const grouped = groupEventsByDate(filteredEvents);
-        setGroupedEvents(grouped);
+        setFilteredEvents(filtered);
+        setVisibleCount(EVENTS_PER_PAGE);
         setError(null);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to load events");
@@ -134,10 +138,40 @@ export default function Home() {
     loadEvents();
   }, [isAuthenticated]);
 
+  useEffect(() => {
+    const visibleEvents = filteredEvents.slice(0, visibleCount);
+    const grouped = groupEventsByDate(visibleEvents);
+    setGroupedEvents(grouped);
+  }, [filteredEvents, visibleCount]);
+
+  const hasMore = visibleCount < filteredEvents.length;
+  const loaderRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!hasMore) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setVisibleCount((prev) => prev + EVENTS_PER_PAGE);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (loaderRef.current) {
+      observer.observe(loaderRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [hasMore]);
+
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="text-light-blue text-lg font-medium">Loading events...</div>
+        <div className="text-light-blue text-lg font-medium">
+          Loading events...
+        </div>
       </div>
     );
   }
@@ -169,10 +203,20 @@ export default function Home() {
               <Button className="bg-pink hover:bg-pink/80 text-background font-semibold shrink-0">
                 <span className="hidden sm:inline">Hacker Login</span>
                 <span className="sm:hidden">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
-                    <polyline points="10 17 15 12 10 7"/>
-                    <line x1="15" y1="12" x2="3" y2="12"/>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+                    <polyline points="10 17 15 12 10 7" />
+                    <line x1="15" y1="12" x2="3" y2="12" />
                   </svg>
                 </span>
               </Button>
@@ -184,10 +228,20 @@ export default function Home() {
             >
               <span className="hidden sm:inline">Logout</span>
               <span className="sm:hidden">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-                  <polyline points="16 17 21 12 16 7"/>
-                  <line x1="21" y1="12" x2="9" y2="12"/>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                  <polyline points="16 17 21 12 16 7" />
+                  <line x1="21" y1="12" x2="9" y2="12" />
                 </svg>
               </span>
             </Button>
@@ -218,6 +272,10 @@ export default function Home() {
               </div>
             ))}
           </div>
+        )}
+
+        {hasMore && (
+          <div ref={loaderRef} className="h-10" />
         )}
       </div>
 

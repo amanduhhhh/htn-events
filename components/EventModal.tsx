@@ -82,7 +82,7 @@ export function EventModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-card border-0 max-w-5xl h-screen sm:h-auto sm:max-h-[85vh] p-0 flex flex-col top-0 sm:top-[50%] translate-y-0 sm:translate-y-[-50%] rounded-none sm:rounded-lg [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+      <DialogContent className="bg-card border-0 max-w-5xl h-screen sm:h-auto sm:max-h-[85vh] p-0 flex flex-col top-0 sm:top-[50%] translate-y-0 sm:translate-y-[-50%] rounded-none sm:rounded-lg [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] [&>button]:top-8 [&>button]:right-6 [&>button]:sm:top-10 [&>button]:sm:right-8">
         <DialogHeader className="px-8 pt-10 pb-4 sm:px-10 sm:pt-12 sm:pb-6 shrink-0 text-left">
           <DialogDescription className="sr-only">
             Event details for {event.name}
